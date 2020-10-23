@@ -1,14 +1,10 @@
-from mlp_lib import Net
-import mlp_lib as mlp
+from lib import Net
 import torch
-from torch import nn
 from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
-from torch.autograd import Variable
 
 import numpy as np
 import matplotlib.pyplot as plt
-import tqdm
 
 batch_size = 100
 shuffle_dataset = True

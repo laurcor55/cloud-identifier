@@ -1,7 +1,7 @@
 import os
 import random
-from mlp_lib import Net
-import mlp_lib as mlp
+from lib import Net
+import lib
 import torch
 from torch import nn
 from torchvision import datasets, transforms
@@ -98,12 +98,12 @@ for epoch in range(num_epochs):
     if (i+1) % batch_size == 0 or (i+1) == len(train_loader):   
       print('Epoch [%d/%d],  Val Acc: %d, Training Loss: %.4f'
               %(epoch+1, num_epochs, \
-                mlp.get_accuracy(val_loader, net), loss.data))
+                lib.get_accuracy(val_loader, net), loss.data))
     i += 1
 
 # Print the training and test accuracy
-train_acc = mlp.get_accuracy(train_loader, net)
-test_acc = mlp.get_accuracy(val_loader, net)
+train_acc = lib.get_accuracy(train_loader, net)
+test_acc = lib.get_accuracy(val_loader, net)
 
 print('Accuracy of the network on train images: %d %%' % (train_acc))
 print('Accuracy of the network on val images: %d %%' % (test_acc))
