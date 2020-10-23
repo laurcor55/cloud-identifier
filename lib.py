@@ -16,12 +16,47 @@ def get_accuracy(loader, my_net):
     correct += (predicted == labels).sum()
   return 100 * correct // total
 
-class Net(nn.Module):
+
+# Here we are going to create our neural network class by inheiriting the 
+# nn.Module class. The main functions to notice are the initialization function 
+# __init__() and forward propagation function forward().
+
+class CnnNet(nn.Module):
 
   # We initialize our neural net by defining the input size, number of nodes
   # in hidden layers, and the total number of classes we are detecting.
   def __init__(self, input_size, hidden_size, num_classes):
-    super(Net, self).__init__() # The Net class expands upon the nn.Module
+
+    # IMPORTANT: This is often forgotten, but make sure to make a super call.
+    super(Net, self).__init__()
+    #not sequential. forward pass is sequential.
+    self.conv1 = nn.Conv2d(1, 10, kernel_size=3) # 1 input channel since black and white. 10 output channels.
+    self.conv2 = nn.Conv2d(10, 20, 5) # input must be the same as output of previous. size of kernel is 5. output size is 20
+    self.maxpool = nn.MaxPool2d(2) # after first convolution.
+    self.fc = nn.Linear(320, 10) # fully connected layer. 320 from the output of the second maxpool. 10 is number of classes.
+    self.relu = nn.functional.relu
+
+  
+  # Below we construct the output of the forward propagation pass of the neural
+  # net using the layers and activation functions defined in the Net constructor.
+  def forward(self, x):
+    input_size = x.size(0)
+    out = self.relu(self.conv1(x))
+    out = self.maxpool(out)
+    out = self.relu(self.conv2(out))
+    out = self.maxpool(out)
+
+    fc_input = out.view(input_size, -1) # flattens into vector of correct size (320)
+    fc_output = self.fc(fc_input)
+
+    return fc_output
+
+class MlpNet(nn.Module):
+
+  # We initialize our neural net by defining the input size, number of nodes
+  # in hidden layers, and the total number of classes we are detecting.
+  def __init__(self, input_size, hidden_size, num_classes):
+    super(MlpNet, self).__init__() # The Net class expands upon the nn.Module
     
     # Hidden Layer 1
     self.fc1 = nn.Linear(input_size, hidden_size) 

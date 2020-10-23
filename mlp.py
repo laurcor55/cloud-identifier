@@ -1,6 +1,6 @@
 import os
 import random
-from lib import Net
+from lib import MlpNet
 import lib
 import torch
 from torch import nn
@@ -46,18 +46,14 @@ labels_reference = list(train_set.class_to_idx.keys())
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler)
 val_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=val_sampler)
 
-images, labels = next(iter(train_loader))
-
-plt.imshow(images[0].numpy().transpose((1, 2, 0)))
-plt.title(labels_reference[labels[0]])
-plt.show()
+lib.data_preview(train_set)
 
 # Create a neural network object with the specified number of input neurons,
 # hidden neurons, and output neurons (or total classes)
 unique_classes_count = len(labels_reference)
 input_neurons_count = 255*255*3
 hidden_neurons_count = 16
-net = Net(input_neurons_count, hidden_neurons_count, unique_classes_count)
+net = MlpNet(input_neurons_count, hidden_neurons_count, unique_classes_count)
 
 # We use cross-entropy loss with the Adam optimizer. No need to understand what
 # these two mean just yet, we will go over cross-entropy soon and the Adam 

@@ -1,4 +1,3 @@
-from lib import Net
 import lib
 import torch
 from torchvision import datasets, transforms
@@ -29,7 +28,8 @@ val_sampler = SubsetRandomSampler(val_indices)
 
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler)
 val_loader = torch.utils.data.DataLoader(train_set, sampler=val_sampler)
-#lib.data_preview(train_set)
+
+lib.data_preview(train_set)
 
 correct_count = 0
 total_count = 0
@@ -60,4 +60,5 @@ for train_image, train_label in train_loader:
   total_correct = sum(min_labels==val_labels)
   total_tested = len(val_labels)
   correct = total_correct/total_tested
+  print(correct)
   total_count += 1
