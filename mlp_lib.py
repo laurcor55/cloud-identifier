@@ -3,9 +3,6 @@ from torch.autograd import Variable
 import torch
 
 
-# Function for getting accuracy, adapted from: 
-# https://towardsdatascience.com/a-simple-starter-guide-to-build-a-neural-network-3c2cf07b8d7c
-
 def get_accuracy(loader, my_net):
   correct = 0
   total = 0
