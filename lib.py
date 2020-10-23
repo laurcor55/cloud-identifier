@@ -1,6 +1,8 @@
 from torch import nn
 from torch.autograd import Variable
 import torch
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def get_accuracy(loader, my_net):
@@ -49,6 +51,18 @@ class Net(nn.Module):
     out = self.fc3(out)
 
     return out
+
+def data_preview(data_set):
+  labels_reference = list(data_set.class_to_idx.keys())
+  data_loader = torch.utils.data.DataLoader(data_set, batch_size=9)
+  images, labels = next(iter(data_loader))
+  ii = 1
+  for image, label in zip(images, labels):
+    plt.subplot(3, 3, ii)
+    plt.imshow(np.transpose(image.numpy(), (1, 2, 0)))
+    plt.title(labels_reference[label])
+    ii += 1
+  plt.show()
 
 
 

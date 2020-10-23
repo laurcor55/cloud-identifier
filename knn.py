@@ -1,18 +1,17 @@
 from lib import Net
+import lib
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 batch_size = 100
-shuffle_dataset = True
 data_path = 'CCSN_v2'
 input_neurons_count = 255*255*3
-validation_split = .2
-random_seed = 2
-transform = transforms.Compose([transforms.Resize(255),  transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+validation_split = .05
+random_seed = 25
+transform = transforms.Compose([transforms.Resize(255),  transforms.ToTensor(), transforms.Normalize((0.5,), (0.8,))])
 
 train_set = datasets.ImageFolder(data_path, transform=transform)
 
@@ -21,37 +20,44 @@ train_set_size = len(train_set)
 indices = list(range(train_set_size))
 split = int(np.floor(validation_split * train_set_size))
 
-# Shuffle the dataset to increase generalization and speed training
-if shuffle_dataset :
-  np.random.seed(random_seed)
-  np.random.shuffle(indices)
+np.random.seed(random_seed)
+np.random.shuffle(indices)
 
 train_indices, val_indices = indices[split:], indices[:split]
 train_sampler = SubsetRandomSampler(train_indices)
 val_sampler = SubsetRandomSampler(val_indices)
 
-labels_reference = list(train_set.class_to_idx.keys())
-
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler)
 val_loader = torch.utils.data.DataLoader(train_set, sampler=val_sampler)
+#lib.data_preview(train_set)
 
-images, labels = next(iter(train_loader))
-plt.imshow(images[0].numpy().transpose((1, 2, 0)))
-plt.title(labels_reference[labels[0]])
-plt.show()
 correct_count = 0
 total_count = 0
-for val_image, val_label in val_loader:
-  val_image = val_image.numpy().reshape(1, input_neurons_count)
-  distance = []
-  train_label_all = []
-  for train_image, train_label in train_loader:
-    train_image = train_image.numpy().reshape(len(train_label), input_neurons_count)
-    distance.extend(np.sum(np.subtract(train_image, val_image)**2, axis=1))
-    train_label_all.extend(train_label.numpy())
-  ind = distance.index(min(distance))
-  val_label_predict = train_label_all[ind]
+val_labels = np.zeros(len(val_loader)).astype(int)
+
+for train_image, train_label in train_loader:
+  train_image = train_image.numpy().reshape(len(train_label), input_neurons_count)
+  
+  distance = np.zeros((len(train_label), len(val_loader)))
+  val_ind = 0
+
+  for val_image, val_label in val_loader:
+    val_image = val_image.numpy().reshape(1, input_neurons_count)
+    diff = np.sum(np.subtract(train_image, val_image)**2, axis=1)
+    distance[:, val_ind] = diff
+    val_labels[val_ind] = val_label.numpy()
+
+    val_ind += 1
+  batch_min = np.min(distance, axis=0)
+  batch_labels = train_label.numpy()[np.argmin(distance, axis=0)]
+  if (total_count==0):
+    min_distance = batch_min
+    min_labels = batch_labels
+  else:
+    ind_to_update = np.argwhere(batch_min < min_distance)
+    min_distance[ind_to_update] = batch_min[ind_to_update]
+    min_labels[ind_to_update] = batch_labels[ind_to_update]
+  total_correct = sum(min_labels==val_labels)
+  total_tested = len(val_labels)
+  correct = total_correct/total_tested
   total_count += 1
-  if (val_label_predict == val_label.numpy()):
-    correct_count += 1
-  print(correct_count/total_count)
