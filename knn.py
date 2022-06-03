@@ -6,11 +6,11 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import numpy as np
 
 batch_size = 100
-data_path = 'CCSN_v2'
-input_neurons_count = 255*255*3
+data_path = 'CCSN'
+input_neurons_count = 400**2
 validation_split = .05
 random_seed = 25
-transform = transforms.Compose([transforms.Resize(255),  transforms.ToTensor(), transforms.Normalize((0.5,), (0.8,))])
+transform = transforms.Compose([transforms.Resize(400), transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)), transforms.Grayscale()])
 
 train_set = datasets.ImageFolder(data_path, transform=transform)
 

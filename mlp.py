@@ -1,4 +1,3 @@
-import os
 import random
 from lib import MlpNet
 import lib
@@ -10,15 +9,13 @@ from torch.autograd import Variable
 
 import numpy as np
 import matplotlib.pyplot as plt
-import tqdm
 
 batch_size = 100
 validation_split = .2
 
-shuffle_dataset = True
 random_seed = 2
-data_path = 'CCSN_v2'
-transform = transforms.Compose([transforms.Resize(255),  transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+data_path = 'CCSN'
+transform = transforms.Compose([transforms.Resize(400), transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)), transforms.Grayscale()])#, lib.MyCropTransform([70, 0, 400, 330])])
 
 train_set = datasets.ImageFolder(data_path, transform=transform)
 
@@ -26,19 +23,11 @@ train_set = datasets.ImageFolder(data_path, transform=transform)
 train_set_size = len(train_set)
 indices = list(range(train_set_size))
 split = int(np.floor(validation_split * train_set_size))
-
-# Shuffle the dataset to increase generalization and speed training
-if shuffle_dataset :
-    np.random.seed(random_seed)
-    np.random.shuffle(indices)
-
+np.random.seed(random_seed)
+np.random.shuffle(indices)
 train_indices, val_indices = indices[split:], indices[:split]
-
-# Use the SubsetRandomSampler to randomly sample the training dataset for 
-# training and validation data. We will feed this into the dataloader below.
 train_sampler = SubsetRandomSampler(train_indices)
 val_sampler = SubsetRandomSampler(val_indices)
-
 labels_reference = list(train_set.class_to_idx.keys())
 
 # Create dataloader objects - will be used during training and inference
@@ -51,24 +40,14 @@ lib.data_preview(train_set)
 # Create a neural network object with the specified number of input neurons,
 # hidden neurons, and output neurons (or total classes)
 unique_classes_count = len(labels_reference)
-input_neurons_count = 255*255*3
+input_neurons_count = 400*400
 hidden_neurons_count = 16
 net = MlpNet(input_neurons_count, hidden_neurons_count, unique_classes_count)
 
-# We use cross-entropy loss with the Adam optimizer. No need to understand what
-# these two mean just yet, we will go over cross-entropy soon and the Adam 
-# optimizer in a later lecture.
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
 
-
-# Here we create our training loop, which runs for the number of epochs
-# specified below. 
-
-# 1 Epoch represents one entire pass through your training dataset, so 20 epochs
-# means that your model will see each data point ~20 times during training.
 num_epochs = 50
-
 loss_tracker = []
 
 for epoch in range(num_epochs):
@@ -76,8 +55,6 @@ for epoch in range(num_epochs):
   loss = torch.tensor([batch_size])
   i = 0
   for images, labels in train_loader:
-    # Convert torch tensor to a vector of size 784 in order to send it to input
-    # layer
     images = Variable(images.view(-1, input_neurons_count))
     labels = Variable(labels)
 
@@ -86,18 +63,14 @@ for epoch in range(num_epochs):
     loss = criterion(outputs, labels)
     loss.backward()
     optimizer.step()
-
-    # Track losses for plotting later
     loss_tracker.append(loss.data)                                  
 
-    # Visualization code
     if (i+1) % batch_size == 0 or (i+1) == len(train_loader):   
       print('Epoch [%d/%d],  Val Acc: %d, Training Loss: %.4f'
               %(epoch+1, num_epochs, \
                 lib.get_accuracy(val_loader, net), loss.data))
     i += 1
 
-# Print the training and test accuracy
 train_acc = lib.get_accuracy(train_loader, net)
 test_acc = lib.get_accuracy(val_loader, net)
 

@@ -2,3 +2,9 @@
 *.tif
 *.tiff
 *.jpg
+/CCSN_v2
+/omit
+/todo
+/CCSN
+/__pycache__
+*.csv
