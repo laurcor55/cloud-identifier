@@ -41,15 +41,6 @@ class CnnNet(nn.Module):
       nn.Conv2d(size_3, size_2, kernel_size=kernel_3, stride=1, padding=1),
       nn.ReLU(),
       nn.MaxPool2d(kernel_size=3, stride=2))
-
-      #nn.ReLU(inplace=True),
-      
-     # nn.BatchNorm2d(size_1),
-     # nn.Dropout(0.2),
-      
-     # nn.MaxPool2d(kernel_size=2, stride=2),
-      
-      
      
     self.linear_layers = nn.Sequential(
       nn.Dropout(0.5),
@@ -142,7 +133,7 @@ transform = transforms.Compose([ transforms.ToTensor(), transforms.Resize(image_
 train_set_no_transform = datasets.ImageFolder(data_path, transform=transform)
 data_preview(train_set_no_transform)
 
-transform = transforms.Compose([ transforms.ToTensor(), transforms.Resize(image_size), transforms.RandomHorizontalFlip(), transforms.RandomRotation([-20, 20])]) #, CropTransform([0, 0, image_size-50, image_size]),
+transform = transforms.Compose([ transforms.ToTensor(), transforms.Resize(image_size), transforms.RandomHorizontalFlip()])#, transforms.RandomRotation([-20, 20])]) #, CropTransform([0, 0, image_size-50, image_size]),
 train_set = datasets.ImageFolder(data_path, transform=transform)
 data_preview(train_set)
 
@@ -167,7 +158,7 @@ net = CnnNet(unique_classes_count)
 
 criterion = nn.CrossEntropyLoss()
 optimizer= torch.optim.Adam(net.parameters(), lr=lr)
-num_epochs = 50
+num_epochs = 100
 
 loss_tracker = []
 

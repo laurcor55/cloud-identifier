@@ -7,10 +7,10 @@ import numpy as np
 
 batch_size = 100
 data_path = 'CCSN'
-input_neurons_count = 400**2
-validation_split = .05
+input_neurons_count = 255**2
+validation_split = .5
 random_seed = 25
-transform = transforms.Compose([transforms.Resize(400), transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)), transforms.Grayscale()])
+transform = transforms.Compose([transforms.Resize(255), transforms.ToTensor(), transforms.Grayscale()])
 
 train_set = datasets.ImageFolder(data_path, transform=transform)
 
@@ -59,6 +59,12 @@ for train_image, train_label in train_loader:
     min_labels[ind_to_update] = batch_labels[ind_to_update]
   total_correct = sum(min_labels==val_labels)
   total_tested = len(val_labels)
-  correct = total_correct/total_tested
-  print(correct)
+  correct = total_correct/total_tested  
   total_count += 1
+
+print(total_tested)
+print(correct)
+
+
+for val_image, val_label in val_loader:
+  val_image = val_image.numpy().reshape(1, input_neurons_count)
